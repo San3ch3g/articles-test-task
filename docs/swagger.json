@@ -1,0 +1,26 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is an API for test task",
+        "title": "Author Swagger",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/author": {
+            "get": {
+                "description": "Получение задач пользователя по номеру паспорта",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Author"
+                ],
+                "summary": "Получение задач пользователя",
+                "responses": {}
+            }
+        }
+    }
+}

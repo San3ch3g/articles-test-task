@@ -1,0 +1,18 @@
+basePath: /
+host: localhost:8080
+info:
+  contact: {}
+  description: This is an API for test task
+  title: Author Swagger
+  version: "1.0"
+paths:
+  /author:
+    get:
+      description: Получение задач пользователя по номеру паспорта
+      produces:
+      - application/json
+      responses: {}
+      summary: Получение задач пользователя
+      tags:
+      - Author
+swagger: "2.0"
