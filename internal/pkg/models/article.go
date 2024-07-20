@@ -5,4 +5,5 @@ type Article struct {
 	Title    string
 	Content  string
 	AuthorId uint32
+	Author   Author `gorm:"foreignKey:AuthorId;references:Id"`
 }

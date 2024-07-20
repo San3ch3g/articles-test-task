@@ -1,18 +1,273 @@
 basePath: /
+definitions:
+  article.Article:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  article.Authors:
+    properties:
+      articles:
+        items:
+          $ref: '#/definitions/article.Article'
+        type: array
+      username:
+        type: string
+    type: object
+  article.CreateArticleRequest:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  article.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  article.GetAllArticlesResponse:
+    properties:
+      authors:
+        items:
+          $ref: '#/definitions/article.Authors'
+        type: array
+    type: object
+  article.SuccessResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  author.AuthRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  author.AuthResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  author.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  author.SuccessResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
 host: localhost:8080
 info:
   contact: {}
   description: This is an API for test task
-  title: Author Swagger
+  title: Article Swagger
   version: "1.0"
 paths:
-  /author:
-    get:
-      description: Получение задач пользователя по номеру паспорта
+  /article:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую статью с заголовком и содержимым, предоставленными
+        в запросе. Требуется авторизация.
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Данные для создания статьи
+        in: body
+        name: article
+        required: true
+        schema:
+          $ref: '#/definitions/article.CreateArticleRequest'
       produces:
       - application/json
-      responses: {}
-      summary: Получение задач пользователя
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/article.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/article.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/article.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/article.ErrorResponse'
+      summary: Создание новой статьи
+      tags:
+      - Article
+  /article/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет статью по её идентификатору.
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Идентификатор статьи
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/article.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/article.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/article.ErrorResponse'
+      summary: Удаление статьи
+      tags:
+      - Article
+  /article/all:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает все статьи, сгруппированные по авторам.
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/article.GetAllArticlesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/article.ErrorResponse'
+      summary: Получить все статьи
+      tags:
+      - Article
+  /author/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление авторов по id
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID Автора
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/author.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/author.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/author.ErrorResponse'
+      summary: Удаление автора
+      tags:
+      - Author
+  /author/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Авторизация нового автора по имени и паролю
+      parameters:
+      - description: Детали для авторизации автора
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/author.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/author.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/author.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/author.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/author.ErrorResponse'
+      summary: Авторизация автора
+      tags:
+      - Author
+  /author/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Регистрация нового автора по имени и паролю
+      parameters:
+      - description: Детали для регистрации автора
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/author.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/author.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/author.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/author.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/author.ErrorResponse'
+      summary: Регистрация нового автора
       tags:
       - Author
 swagger: "2.0"

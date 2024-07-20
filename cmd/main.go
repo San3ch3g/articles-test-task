@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-// @title Author Swagger
+// @title Article Swagger
 // @version 1.0
 // @description This is an API for test task
 // @host localhost:8080

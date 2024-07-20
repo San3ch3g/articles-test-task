@@ -1,12 +1,15 @@
 package handlers
 
 import (
-	_ "articleModule/docs"
+	"articleModule/internal/pkg/handlers/article"
+	"articleModule/internal/pkg/handlers/author"
+	"articleModule/internal/pkg/service"
 	"articleModule/internal/pkg/storage/pg"
 	"articleModule/internal/utils/config"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"net/http"
 )
 
 type Server struct {
@@ -32,11 +35,49 @@ func (s *Server) InitSwagger() {
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 }
 
-func (s *Server) initRoutes() {
-	author := s.router.Group("/author")
-	{
-		author.GET("", s.GetAuthor)
+func AuthMiddleware(secret []byte) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.URL.Path == "/author/sign-in" || c.Request.URL.Path == "/author/sign-up" {
+			c.Next()
+			return
+		}
 
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token required"})
+			c.Abort()
+			return
+		}
+
+		_, err := service.ValidateToken(secret, authHeader)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func (s *Server) initRoutes() {
+	authorHandlers := author.NewAuthorServer(s.storage, s.cfg)
+	articleHandlers := article.NewArticleServer(s.storage, s.cfg)
+
+	authGroup := s.router.Group("/", AuthMiddleware([]byte(s.cfg.Secret)))
+
+	authorGroup := authGroup.Group("/author")
+	{
+		authorGroup.POST("/sign-in", authorHandlers.AuthorizeAuthor)
+		authorGroup.POST("/sign-up", authorHandlers.RegisterAuthor)
+		authorGroup.DELETE("/:id", authorHandlers.DeleteAuthor)
+	}
+
+	articleGroup := authGroup.Group("/article")
+	{
+		articleGroup.GET("/all", articleHandlers.GetAllArticles)
+		articleGroup.POST("", articleHandlers.CreateArticle)
+		articleGroup.DELETE("/:id", articleHandlers.DeleteArticle)
 	}
 }
 

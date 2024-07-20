@@ -13,6 +13,7 @@ type Config struct {
 	DbHost     string
 	DbPort     string
 	ServerPort string
+	Secret     string
 }
 
 func NewConfig() *Config {
@@ -31,4 +32,5 @@ func (cfg *Config) InitENV() {
 	cfg.ServerPort = os.Getenv("SERVER_PORT")
 	cfg.DbHost = os.Getenv("DB_HOST")
 	cfg.DbPort = os.Getenv("DB_PORT")
+	cfg.Secret = os.Getenv("SECRET")
 }
