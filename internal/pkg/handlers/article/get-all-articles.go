@@ -2,6 +2,7 @@ package article
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -21,14 +22,16 @@ type GetAllArticlesResponse struct {
 // @Failure 500 {object} ErrorResponse
 // @Router /article/all [get]
 func (s *Server) GetAllArticles(c *gin.Context) {
+	log.Println("GetAllArticles handler called")
+
 	articles, err := s.storage.GetAllArticles()
 	if err != nil {
+		log.Printf("Error retrieving articles: %v", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	authorMap := make(map[uint32]*Authors)
-
 	for _, article := range articles {
 		if _, ok := authorMap[article.AuthorId]; !ok {
 			authorMap[article.AuthorId] = &Authors{
@@ -45,10 +48,10 @@ func (s *Server) GetAllArticles(c *gin.Context) {
 	response := GetAllArticlesResponse{
 		Authors: make([]Authors, 0, len(authorMap)),
 	}
-
 	for _, author := range authorMap {
 		response.Authors = append(response.Authors, *author)
 	}
 
+	log.Println("Successfully retrieved all articles")
 	c.JSON(http.StatusOK, response)
 }
